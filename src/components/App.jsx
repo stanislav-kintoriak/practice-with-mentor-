@@ -1,25 +1,64 @@
-import { Profile } from '../components/Profile/Profile.js';
-import { Statistics } from '../components/Statistics/Statistics.js';
-import { FriendList } from '../components/FriendList/FriendList.js';
-import { TransactionHistory } from '../components/TransactionHistory/TransactionHistory.js';
-import user from '../data/user.json';
-import data from '../data/data.json';
-import friends from '../data/friends.json';
-import transactions from '../data/transactions.json';
+import { Component } from 'react';
+import { data } from '../data/users';
+import { UsersList } from './UsersList/UsersList';
+import Button from './Button/Button';
+import AddUserForm from './AddUserForm/AddUserForm';
+import { nanoid } from 'nanoid';
 
-export const App = () => {
-  return (
-    <>
-      <Profile
-        imageUrl={user.avatar}
-        name={user.username}
-        tag={user.tag}
-        location={user.location}
-        stats={user.stats}
-      />
-      <Statistics title="Upload stats" stats={data} />
-      <FriendList friends={friends} />
-      <TransactionHistory items={transactions} />
-    </>
-  );
+class App extends Component {
+  state = {
+    users: data,
+    isListShown: false,
+    isFormShown: false,
+  };
+
+  showList = () => {
+    this.setState({ isListShown: true });
+  };
+
+  addUser = data => {
+    const newUser = { id: nanoid(), ...data };
+    this.setState(prevState => {
+      return { users: [...prevState.users, newUser] };
+    });
+  };
+
+  deleteUser = id => {
+    this.setState(prevState => {
+      return {
+        users: prevState.users.filter(user => user.id !== id),
+      };
+    });
+  };
+
+  openForm = () => {
+    this.setState({ isFormShown: true });
+  };
+
+  closeForm = () => {
+    this.setState({isFormShown: false})
+  }
+
+  render() {
+    const { users, isListShown, isFormShown } = this.state;
+    return (
+      <div>
+        {!isListShown ? (
+          <Button text="Show list of users" clickHandler={this.showList} />
+        ) : (
+          <UsersList users={users} deleteUser={this.deleteUser} />
+        )}
+
+        {!isFormShown ? (
+          <AddUserForm addUser={this.addUser} onFormClose = {this.closeForm}/>
+        ):
+        (
+          <Button text="Add user" clickHandler={this.openForm} />
+        )
+        }
+      </div>
+    );
+  }
 }
+
+export default App;
